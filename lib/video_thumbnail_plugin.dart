@@ -14,7 +14,8 @@ class VideoThumbnailPlugin {
     int? quality,
     String format = "jpg", // "png" or "jpeg" or "webp"
   }) async {
-    final String? result = await _channel.invokeMethod('generateImageThumbnail', {
+    final String? result =
+        await _channel.invokeMethod('generateImageThumbnail', {
       'videoPath': videoPath,
       'thumbnailPath': thumbnailPath,
       'format': format,
@@ -40,5 +41,4 @@ class VideoThumbnailPlugin {
     });
     return result;
   }
-
 }

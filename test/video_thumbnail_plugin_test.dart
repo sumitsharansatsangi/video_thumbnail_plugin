@@ -7,13 +7,13 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockVideoThumbnailPluginPlatform
     with MockPlatformInterfaceMixin
     implements VideoThumbnailPluginPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 }
 
 void main() {
-  final VideoThumbnailPluginPlatform initialPlatform = VideoThumbnailPluginPlatform.instance;
+  final VideoThumbnailPluginPlatform initialPlatform =
+      VideoThumbnailPluginPlatform.instance;
 
   test('$MethodChannelVideoThumbnailPlugin is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelVideoThumbnailPlugin>());
@@ -21,8 +21,8 @@ void main() {
 
   test('getPlatformVersion', () async {
     // VideoThumbnailPlugin videoThumbnailPlugin = VideoThumbnailPlugin();
-    MockVideoThumbnailPluginPlatform fakePlatform = MockVideoThumbnailPluginPlatform();
+    MockVideoThumbnailPluginPlatform fakePlatform =
+        MockVideoThumbnailPluginPlatform();
     VideoThumbnailPluginPlatform.instance = fakePlatform;
-
   });
 }

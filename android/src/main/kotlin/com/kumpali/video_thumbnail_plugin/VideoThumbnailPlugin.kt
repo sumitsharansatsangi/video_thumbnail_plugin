@@ -59,12 +59,26 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
                 if (multiProcess == true) {
                     GlobalScope.launch(Dispatchers.Main) {
                         val gifPath = withContext(Dispatchers.IO) {
-                            generateGifThumbnailMultiProcess(videoPath, thumbnailPath, width, height,frameCount)
+                            generateGifThumbnailMultiProcess(
+                                videoPath,
+                                thumbnailPath,
+                                width,
+                                height,
+                                frameCount
+                            )
                         }
                         result.success(gifPath)
                     }
-                }else{
-                    result.success(generateGifThumbnail(videoPath, thumbnailPath, width, height, frameCount))
+                } else {
+                    result.success(
+                        generateGifThumbnail(
+                            videoPath,
+                            thumbnailPath,
+                            width,
+                            height,
+                            frameCount
+                        )
+                    )
                 }
             } else {
                 result.error("INVALID_ARGUMENT", "Invalid arguments received", null)

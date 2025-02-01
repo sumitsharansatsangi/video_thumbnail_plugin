@@ -73,7 +73,7 @@ class MyAppState extends State<MyApp> {
         thumbnailPath: gifThumbnailPath,
       );
       debugPrint('GIF Thumbnail: $gifThumbnail');
-      } else {
+    } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -8,7 +8,8 @@ abstract class VideoThumbnailPluginPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static VideoThumbnailPluginPlatform _instance = MethodChannelVideoThumbnailPlugin();
+  static VideoThumbnailPluginPlatform _instance =
+      MethodChannelVideoThumbnailPlugin();
 
   /// The default instance of [VideoThumbnailPluginPlatform] to use.
   ///
