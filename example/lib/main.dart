@@ -24,34 +24,25 @@ class MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  Future<void> generateThumbnails() async {
-   
-    setState(() { isGenerating = true;});
-   
+  Future<void> generateImageThumbnail() async {
+    setState(() {
+      isGenerating = true;
+    });
+
     FilePickerResult? result =
         await FilePicker.platform.pickFiles(type: FileType.video);
     if (result != null && result.files.single.path != null) {
       videoPath = result.files.single.path!;
       imageThumbnailPath = '${result.files.single.path}.jpg';
-      gifThumbnailPath = '${result.files.single.path}.gif';
 
       // Generate image thumbnail
-      String? imageThumbnail = await VideoThumbnailPlugin.generateThumbnail(
+      String? imageThumbnail =
+          await VideoThumbnailPlugin.generateImageThumbnail(
         videoPath: videoPath,
         thumbnailPath: imageThumbnailPath,
         type: 'image',
       );
       debugPrint('Image Thumbnail: $imageThumbnail');
-
-      // Generate GIF thumbnail
-      String? gifThumbnail = await VideoThumbnailPlugin.generateThumbnail(
-        videoPath: videoPath,
-        thumbnailPath: gifThumbnailPath,
-        type: 'gif',
-        format: 'png',
-      );
-      debugPrint('GIF Thumbnail: $gifThumbnail');
-      setState(() {});
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +52,39 @@ class MyAppState extends State<MyApp> {
         );
       }
     }
-    setState(() { isGenerating = false;});
+    setState(() {
+      isGenerating = false;
+    });
+  }
+
+  Future<void> generateGifThumbnail() async {
+    setState(() {
+      isGenerating = true;
+    });
+
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.video);
+    if (result != null && result.files.single.path != null) {
+      videoPath = result.files.single.path!;
+      gifThumbnailPath = '${result.files.single.path}.gif';
+      // Generate GIF thumbnail
+      String? gifThumbnail = await VideoThumbnailPlugin.generateGifThumbnail(
+        videoPath: videoPath,
+        thumbnailPath: gifThumbnailPath,
+      );
+      debugPrint('GIF Thumbnail: $gifThumbnail');
+      } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No file selected'),
+          ),
+        );
+      }
+    }
+    setState(() {
+      isGenerating = false;
+    });
   }
 
   @override
@@ -73,14 +96,15 @@ class MyAppState extends State<MyApp> {
           title: Text('Video Thumbnail Plugin Example'),
         ),
         body: isGenerating
-            ? Center(child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                Text('Generating Thumbnails...'),
-                Text("Please wait..."),
-              ],
-            ))
+            ? Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  Text('Generating Thumbnails...'),
+                  Text("Please wait..."),
+                ],
+              ))
             : Center(
                 child: SingleChildScrollView(
                   child: Column(
@@ -91,8 +115,11 @@ class MyAppState extends State<MyApp> {
                         GifView.memory(
                             File(gifThumbnailPath).readAsBytesSync()),
                       ElevatedButton(
-                          onPressed: generateThumbnails,
-                          child: Text('Generate Thumbnails')),
+                          onPressed: generateImageThumbnail,
+                          child: Text('Generate Image Thumbnails')),
+                      ElevatedButton(
+                          onPressed: generateGifThumbnail,
+                          child: Text('Generate Gif Thumbnails')),
                     ],
                   ),
                 ),
