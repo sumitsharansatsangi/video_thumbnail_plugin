@@ -45,11 +45,13 @@ String imageThumbnailPath = '/path/to/your/image_thumbnail.jpg';
 // Specify the format: 'jpg', 'png', or 'webp'
 String format = 'jpg';
 
-String? imageThumbnail = await VideoThumbnailPlugin.generateThumbnail(
+String? imageThumbnail = await VideoThumbnailPlugin.generateImageThumbnail(
   videoPath: videoPath,
   thumbnailPath: imageThumbnailPath,
-  type: 'image',
   format: format,
+  width: 100,
+  height: 100,
+  quality: 95,
 );
 
 print('Image Thumbnail: $imageThumbnail');
@@ -61,11 +63,12 @@ print('Image Thumbnail: $imageThumbnail');
 String videoPath = '/path/to/your/video.mp4';
 String gifThumbnailPath = '/path/to/your/gif_thumbnail.gif';
 
-String? gifThumbnail = await VideoThumbnailPlugin.generateThumbnail(
+String? gifThumbnail = await VideoThumbnailPlugin.generateGifThumbnail(
   videoPath: videoPath,
   thumbnailPath: gifThumbnailPath,
-  type: 'gif',
-  format: 'gif', // Format is fixed as 'gif' for GIF thumbnails
+  width: 100,
+  height: 100,
+  multiProcess: true, // Multi-process is used for generating GIF thumbnails, default is true
 );
 
 print('GIF Thumbnail: $gifThumbnail');
