@@ -5,8 +5,6 @@ import android.media.MediaMetadataRetriever
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -14,7 +12,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import java.io.FileOutputStream
 import java.io.IOException
 
-class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
+class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler{
   private lateinit var channel: MethodChannel
 
   override fun onAttachedToEngine(binding: FlutterPluginBinding) {
@@ -31,10 +29,13 @@ class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       val videoPath = call.argument<String>("videoPath")
       val thumbnailPath = call.argument<String>("thumbnailPath")
       val type = call.argument<String>("type") // image or gif
-      val format = call.argument<String>("format") // jpg, png, or webp
-      if (videoPath != null && thumbnailPath != null && type != null  && format != null) {
+      val width = call.argument<Int?>("width")
+      val height = call.argument<Int?>("height")
+      if (videoPath != null && thumbnailPath != null && type != null) {
         if (type == "image") {
-          result.success(generateImageThumbnail(videoPath, thumbnailPath, format))
+          val format = call.argument<String>("format")
+          val quality = call.argument<Int?>("quality") // jpg, png, or webp
+          result.success(generateImageThumbnail(videoPath, thumbnailPath,width, height, format.toString(), quality))
         } else if (type == "gif") {
           result.success(generateGifThumbnail(videoPath, thumbnailPath))
         }
@@ -46,24 +47,38 @@ class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun generateImageThumbnail(videoPath: String, thumbnailPath: String, format: String): String? {
+  private fun generateImageThumbnail(videoPath: String, thumbnailPath: String, width: Int?, height: Int?, format: String, quality: Int? = null): String? {
     val retriever = MediaMetadataRetriever()
     return try {
       retriever.setDataSource(videoPath)
-      val bitmap = retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-      if (bitmap == null) {
+      var bitmap = retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+      if (bitmap != null) {
+        if (width != null && height != null) {
+          bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
+        }else if (width != null) {
+          val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+          val newHeight = (width / aspectRatio).toInt()
+          bitmap = Bitmap.createScaledBitmap(bitmap, width, newHeight, true)
+        }else if (height != null) {
+          val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+          val newWidth = (height * aspectRatio).toInt()
+          bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, height, true)
+        }
+        val fileOutputStream = FileOutputStream(thumbnailPath)
+        val compressFormat = when (format.lowercase()) {
+          "png" -> Bitmap.CompressFormat.PNG
+          "webp" -> Bitmap.CompressFormat.WEBP
+          else -> Bitmap.CompressFormat.JPEG
+        }
+        if (quality != null && quality in 1..100) {
+          bitmap.compress(compressFormat, quality, fileOutputStream)
+        }
+        fileOutputStream.flush()
+        fileOutputStream.close()
+        thumbnailPath
+      }else{
         null
       }
-      val fileOutputStream = FileOutputStream(thumbnailPath)
-      val compressFormat = when (format.lowercase()) {
-        "png" -> Bitmap.CompressFormat.PNG
-        "webp" -> Bitmap.CompressFormat.WEBP
-        else -> Bitmap.CompressFormat.JPEG
-      }
-      bitmap?.compress(compressFormat, 90, fileOutputStream)
-      fileOutputStream.flush()
-      fileOutputStream.close()
-      thumbnailPath
     } catch (e: IOException) {
       e.printStackTrace()
       null
@@ -72,7 +87,7 @@ class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun generateGifThumbnail(videoPath: String, thumbnailPath: String): String? {
+  private fun generateGifThumbnail(videoPath: String, thumbnailPath: String, width: Int? = null, height: Int? = null): String? {
     val retriever = MediaMetadataRetriever()
     val encoder = AnimatedGifEncoder()
     return try {
@@ -87,14 +102,23 @@ class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
       var time = 0L
       while (time < duration) {
-        val bitmap = retriever.getFrameAtTime(time * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+        var bitmap = retriever.getFrameAtTime(time * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
         if (bitmap != null) {
-          val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 320, 240, true)
-          encoder.addFrame(scaledBitmap)
+          if (width != null && height != null) {
+            bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true)
+          }else if (width != null) {
+            val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+            val newHeight = (width / aspectRatio).toInt()
+            bitmap = Bitmap.createScaledBitmap(bitmap, width, newHeight, true)
+          }else if (height != null) {
+            val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+            val newWidth = (height * aspectRatio).toInt()
+            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, height, true)
+          }
+          encoder.addFrame(bitmap)
         }
         time += frameInterval
       }
-
       encoder.finish()
       outputStream.close()
       thumbnailPath
@@ -105,9 +129,4 @@ class VideoThumbnailPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       retriever.release()
     }
   }
-
-  override fun onAttachedToActivity(binding: ActivityPluginBinding) {}
-  override fun onDetachedFromActivityForConfigChanges() {}
-  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {}
-  override fun onDetachedFromActivity() {}
 }

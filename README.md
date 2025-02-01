@@ -1,15 +1,96 @@
-# video_thumbnail_plugin
+# Video Thumbnail Plugin
 
-A new Flutter plugin project.
+A Flutter plugin to generate image and GIF thumbnails from video files. This plugin supports multiple image formats including JPEG, PNG, and WebP.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+- Generate image thumbnails from video files in JPEG, PNG, and WebP formats.
+- Generate GIF thumbnails from video files.
+- Cross-platform support (Android and iOS).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Installation
 
+Add the following dependency to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  video_thumbnail_plugin: ^0.0.1
+```
+
+If you want to use the latest version, add this instead:
+
+```yaml
+dependencies:
+  video_thumbnail_plugin:
+    git:
+      url: https://github.com/sumitsharansatsangi/video_thumbnail_plugin.git
+```
+
+Then, run `flutter pub get` to fetch the package.
+
+## Usage
+
+Import the package in your Dart code:
+
+```dart
+import 'package:video_thumbnail_plugin/video_thumbnail_plugin.dart';
+```
+
+### Generating Image Thumbnail
+
+```dart
+String videoPath = '/path/to/your/video.mp4';
+String imageThumbnailPath = '/path/to/your/image_thumbnail.jpg';
+
+// Specify the format: 'jpg', 'png', or 'webp'
+String format = 'jpg';
+
+String? imageThumbnail = await VideoThumbnailPlugin.generateThumbnail(
+  videoPath: videoPath,
+  thumbnailPath: imageThumbnailPath,
+  type: 'image',
+  format: format,
+);
+
+print('Image Thumbnail: $imageThumbnail');
+```
+
+### Generating GIF Thumbnail
+
+```dart
+String videoPath = '/path/to/your/video.mp4';
+String gifThumbnailPath = '/path/to/your/gif_thumbnail.gif';
+
+String? gifThumbnail = await VideoThumbnailPlugin.generateThumbnail(
+  videoPath: videoPath,
+  thumbnailPath: gifThumbnailPath,
+  type: 'gif',
+  format: 'gif', // Format is fixed as 'gif' for GIF thumbnails
+);
+
+print('GIF Thumbnail: $gifThumbnail');
+```
+
+## Platform-Specific Implementation
+
+### Android
+
+- Uses `MediaMetadataRetriever` to extract frames from the video.
+- Encodes frames into GIF using `AnimatedGifEncoder`.
+
+### iOS
+
+- Uses `AVAssetImageGenerator` to extract frames from the video.
+- Encodes frames into GIF using `ImageIO`.
+
+## Contributions
+
+Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+
+## License
+
+MIT License
+
+---
+
+Feel free to customize the repository URL and add any additional sections or information you think might be useful. Let me know if you need any more help!
