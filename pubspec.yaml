@@ -1,12 +1,12 @@
 name: video_thumbnail_plugin
-description: "Gif and Image Thumbnail Generation for Flutter"
+description: "Plugin for generating image and GIF thumbnails from video files."
 version: 0.0.1
 homepage: https://github.com/sumitsharansatsangi/video_thumbnail_plugin
 repository: https://github.com/sumitsharansatsangi/video_thumbnail_plugin
 issue_tracker: https://github.com/sumitsharansatsangi/video_thumbnail_plugin/issues
 
 topics:
-  - video-thumbnail_plugin
+  - video-thumbnail-plugin
   - video-preview-thumbnails
   - gif-thumbnails
   - image-thumbnails
