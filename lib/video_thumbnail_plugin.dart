@@ -5,40 +5,47 @@ import 'package:flutter/services.dart';
 class VideoThumbnailPlugin {
   static const MethodChannel _channel = MethodChannel('video_thumbnail_plugin');
 
-  static Future<String?> generateImageThumbnail({
+  static Future<void> generateImageThumbnail({
     required String videoPath,
     required String thumbnailPath,
-    required String type,
     int? width,
     int? height,
     int? quality,
-    String format = "jpg", // "png" or "jpeg" or "webp"
+    Format format = Format.png, // "png" or "jpg" or "webp"
   }) async {
-    final String? result =
-        await _channel.invokeMethod('generateImageThumbnail', {
+    await _channel.invokeMethod('generateImageThumbnail', {
       'videoPath': videoPath,
       'thumbnailPath': thumbnailPath,
-      'format': format,
+      'format': format.index,
       'width': width,
       'height': height,
       'quality': quality,
     });
-    return result;
   }
 
-  static Future<String?> generateGifThumbnail({
+  static Future<void> generateGifThumbnail({
     required String videoPath,
     required String thumbnailPath,
     int? width,
     int? height,
+    int? frameCount,
+    int? quality,
+    int? delay,
+    int? repeat = 0, // 0 means repeat forever
+    bool multiProcess = true,
   }) async {
-    final String? result = await _channel.invokeMethod('generateGifThumbnail', {
+    await _channel.invokeMethod('generateGifThumbnail', {
       'videoPath': videoPath,
       'thumbnailPath': thumbnailPath,
       'width': width,
       'height': height,
-      "multiProcess": true,
+      'frameCount': frameCount,
+      'quality': quality,
+      'delay': delay,
+      'repeat': repeat,
+      "multiProcess": multiProcess,
     });
-    return result;
   }
 }
+
+enum Format { png, jpg, webp }

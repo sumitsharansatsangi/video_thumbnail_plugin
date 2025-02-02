@@ -33,7 +33,7 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
             val width = call.argument<Int?>("width")
             val height = call.argument<Int?>("height")
             if (videoPath != null && thumbnailPath != null) {
-                val format = call.argument<String>("format")
+                val format = call.argument<Int>("format")
                 val quality = call.argument<Int?>("quality") // jpg, png, or webp
                 result.success(
                     generateImageThumbnail(
@@ -41,8 +41,8 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
                         thumbnailPath,
                         width,
                         height,
-                        format.toString(),
-                        quality
+                        format ?:0,
+                        quality ?:100
                     )
                 )
             } else {
@@ -51,10 +51,12 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
         } else if (call.method == "generateGifThumbnail") {
             val videoPath = call.argument<String>("videoPath")
             val thumbnailPath = call.argument<String>("thumbnailPath")
-            val width = call.argument<Int?>("width")
-            val height = call.argument<Int?>("height")
-            val frameCount = call.argument<Int?>("frameCount") ?: 10 // Default frame count is 10
             if (videoPath != null && thumbnailPath != null) {
+                val width = call.argument<Int?>("width")
+                val height = call.argument<Int?>("height")
+                val frameCount = call.argument<Int?>("frameCount") ?: 10 // Default frame count is 10
+                val delay = call.argument<Int?>("delay") ?: 100 // Default delay is 100
+                val repeat = call.argument<Int?>("repeat") ?: 0 // Default repeat is 0
                 val multiProcess = call.argument<Boolean>("multiProcess")
                 if (multiProcess == true) {
                     GlobalScope.launch(Dispatchers.Main) {
@@ -64,7 +66,9 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
                                 thumbnailPath,
                                 width,
                                 height,
-                                frameCount
+                                frameCount,
+                                delay,
+                                repeat
                             )
                         }
                         result.success(gifPath)
@@ -76,7 +80,9 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
                             thumbnailPath,
                             width,
                             height,
-                            frameCount
+                            frameCount,
+                            delay,
+                            repeat
                         )
                     )
                 }
@@ -93,8 +99,8 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
         thumbnailPath: String,
         width: Int?,
         height: Int?,
-        format: String,
-        quality: Int? = null
+        format: Int,
+        quality: Int
     ): String? {
         val retriever = MediaMetadataRetriever()
         return try {
@@ -114,12 +120,12 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
                     bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, height, true)
                 }
                 val fileOutputStream = FileOutputStream(thumbnailPath)
-                val compressFormat = when (format.lowercase()) {
-                    "png" -> Bitmap.CompressFormat.PNG
-                    "webp" -> Bitmap.CompressFormat.WEBP
+                val compressFormat = when (format) {
+                    0 -> Bitmap.CompressFormat.PNG
+                    2 -> Bitmap.CompressFormat.WEBP
                     else -> Bitmap.CompressFormat.JPEG
                 }
-                if (quality != null && quality in 1..100) {
+                if (quality in 1..100) {
                     bitmap.compress(compressFormat, quality, fileOutputStream)
                 } else {
                     bitmap.compress(compressFormat, 100, fileOutputStream)
@@ -143,7 +149,9 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
         thumbnailPath: String,
         width: Int? = null,
         height: Int? = null,
-        frameCount: Int
+        frameCount: Int,
+        delay: Int,
+        repeat: Int
     ): String? {
         val retriever = MediaMetadataRetriever()
         val encoder = AnimatedGifEncoder()
@@ -151,8 +159,8 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
             retriever.setDataSource(videoPath)
             val outputStream = FileOutputStream(thumbnailPath)
             encoder.start(outputStream)
-            encoder.setRepeat(0)
-            encoder.setDelay(100)
+            encoder.setRepeat(repeat)
+            encoder.setDelay(delay)
 
             val duration =
                 retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
@@ -205,7 +213,9 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
         thumbnailPath: String,
         width: Int? = null,
         height: Int? = null,
-        frameCount: Int
+        frameCount: Int,
+        delay: Int,
+        repeat: Int
     ): String? {
         val retriever = MediaMetadataRetriever()
         val encoder = AnimatedGifEncoder()
@@ -213,8 +223,8 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
             retriever.setDataSource(videoPath)
             val outputStream = FileOutputStream(thumbnailPath)
             encoder.start(outputStream)
-            encoder.setRepeat(0)
-            encoder.setDelay(100)
+            encoder.setRepeat(repeat)
+            encoder.setDelay(delay)
             val duration =
                 retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
                     ?: 0L

@@ -19,6 +19,7 @@ class MyAppState extends State<MyApp> {
   String imageThumbnailPath = '';
   String gifThumbnailPath = '';
   bool isGenerating = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,22 +37,23 @@ class MyAppState extends State<MyApp> {
       imageThumbnailPath = '${result.files.single.path}.jpg';
 
       // Generate image thumbnail
-      String? imageThumbnail =
-          await VideoThumbnailPlugin.generateImageThumbnail(
+      await VideoThumbnailPlugin.generateImageThumbnail(
         videoPath: videoPath,
         thumbnailPath: imageThumbnailPath,
-        type: 'image',
+        format: Format.jpg,
       );
-      debugPrint('Image Thumbnail: $imageThumbnail');
+      debugPrint('Image Thumbnail: $imageThumbnailPath');
+      setState(() {});
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('No file selected'),
           ),
         );
       }
     }
+
     setState(() {
       isGenerating = false;
     });
@@ -67,21 +69,26 @@ class MyAppState extends State<MyApp> {
     if (result != null && result.files.single.path != null) {
       videoPath = result.files.single.path!;
       gifThumbnailPath = '${result.files.single.path}.gif';
+
       // Generate GIF thumbnail
-      String? gifThumbnail = await VideoThumbnailPlugin.generateGifThumbnail(
+      await VideoThumbnailPlugin.generateGifThumbnail(
         videoPath: videoPath,
         thumbnailPath: gifThumbnailPath,
+        frameCount: 10, // Specify the number of frames here
       );
-      debugPrint('GIF Thumbnail: $gifThumbnail');
+      debugPrint('GIF Thumbnail: $gifThumbnailPath');
+
+      setState(() {});
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('No file selected'),
           ),
         );
       }
     }
+
     setState(() {
       isGenerating = false;
     });
@@ -93,13 +100,13 @@ class MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Video Thumbnail Plugin Example'),
+          title: const Text('Video Thumbnail Plugin Example'),
         ),
         body: isGenerating
             ? Center(
                 child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: const [
                   CircularProgressIndicator(),
                   Text('Generating Thumbnails...'),
                   Text("Please wait..."),
@@ -116,10 +123,10 @@ class MyAppState extends State<MyApp> {
                             File(gifThumbnailPath).readAsBytesSync()),
                       ElevatedButton(
                           onPressed: generateImageThumbnail,
-                          child: Text('Generate Image Thumbnails')),
+                          child: const Text('Generate Image Thumbnails')),
                       ElevatedButton(
                           onPressed: generateGifThumbnail,
-                          child: Text('Generate Gif Thumbnails')),
+                          child: const Text('Generate Gif Thumbnails')),
                     ],
                   ),
                 ),

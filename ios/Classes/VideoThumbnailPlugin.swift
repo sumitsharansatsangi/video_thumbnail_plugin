@@ -2,11 +2,13 @@ import Flutter
 import UIKit
 import AVFoundation
 import ImageIO
+import UniformTypeIdentifiers
+import MobileCoreServices 
 
-public class SwiftVideoThumbnailPlugin: NSObject, FlutterPlugin {
+public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "video_thumbnail_plugin", binaryMessenger: registrar.messenger())
-    let instance = SwiftVideoThumbnailPlugin()
+    let instance = VideoThumbnailPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
@@ -18,8 +20,9 @@ public class SwiftVideoThumbnailPlugin: NSObject, FlutterPlugin {
     if call.method == "generateThumbnail" {
       guard let videoPath = args["videoPath"] as? String,
             let thumbnailPath = args["thumbnailPath"] as? String,
-            let type = args["type"] as? String
-            let format = args["format"] as? String  else {
+            let type = args["type"] as? String,
+            let format = args["format"] as? String
+      else {
           result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid arguments received", details: nil))
           return
       }
@@ -62,8 +65,19 @@ public class SwiftVideoThumbnailPlugin: NSObject, FlutterPlugin {
     let imageGenerator = AVAssetImageGenerator(asset: asset)
     imageGenerator.appliesPreferredTrackTransform = true
 
-    let fileURL = URL(fileURLWithPath: thumbnailPath)
-    guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, kUTTypeGIF, 0, nil) else {
+    let gifType: CFString
+
+    if #available(iOS 14, *) {
+
+      gifType = UTType.gif.identifier as CFString
+
+    } else {
+
+      gifType = kUTTypeGIF
+
+    }
+
+    guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, gifType, 0, nil) else {
         return nil
     }
 
