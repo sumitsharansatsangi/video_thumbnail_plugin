@@ -41,8 +41,8 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
                         thumbnailPath,
                         width,
                         height,
-                        format ?:0,
-                        quality ?:100
+                        format ?: 0,
+                        quality ?: 100
                     )
                 )
             } else {
@@ -54,7 +54,8 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodCallHandler {
             if (videoPath != null && thumbnailPath != null) {
                 val width = call.argument<Int?>("width")
                 val height = call.argument<Int?>("height")
-                val frameCount = call.argument<Int?>("frameCount") ?: 10 // Default frame count is 10
+                val frameCount =
+                    call.argument<Int?>("frameCount") ?: 10 // Default frame count is 10
                 val delay = call.argument<Int?>("delay") ?: 100 // Default delay is 100
                 val repeat = call.argument<Int?>("repeat") ?: 0 // Default repeat is 0
                 val multiProcess = call.argument<Boolean>("multiProcess")

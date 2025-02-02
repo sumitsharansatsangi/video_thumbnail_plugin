@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:video_thumbnail_plugin/video_thumbnail_plugin.dart';
 
-void main() => runApp(MyApp());
+void main() =>
+    runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -45,13 +46,15 @@ class MyAppState extends State<MyApp> {
       debugPrint('Image Thumbnail: $imageThumbnailPath');
       setState(() {});
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No file selected'),
-          ),
-        );
-      }
+      Future.delayed(Duration.zero, () {
+        if (mounted && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No file selected'),
+            ),
+          );
+        }
+      });
     }
 
     setState(() {
@@ -96,42 +99,38 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Video Thumbnail Plugin Example'),
-        ),
-        body: isGenerating
-            ? Center(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Video Thumbnail Plugin Example'),
+      ),
+      body: isGenerating
+          ? Center(
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                CircularProgressIndicator(),
+                Text('Generating Thumbnails...'),
+                Text("Please wait..."),
+              ],
+            ))
+          : Center(
+              child: SingleChildScrollView(
                 child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  Text('Generating Thumbnails...'),
-                  Text("Please wait..."),
-                ],
-              ))
-            : Center(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (imageThumbnailPath.isNotEmpty)
-                        Image.file(File(imageThumbnailPath)),
-                      if (gifThumbnailPath.isNotEmpty)
-                        GifView.memory(
-                            File(gifThumbnailPath).readAsBytesSync()),
-                      ElevatedButton(
-                          onPressed: generateImageThumbnail,
-                          child: const Text('Generate Image Thumbnails')),
-                      ElevatedButton(
-                          onPressed: generateGifThumbnail,
-                          child: const Text('Generate Gif Thumbnails')),
-                    ],
-                  ),
+                  children: [
+                    if (imageThumbnailPath.isNotEmpty)
+                      Image.file(File(imageThumbnailPath)),
+                    if (gifThumbnailPath.isNotEmpty)
+                      GifView.memory(File(gifThumbnailPath).readAsBytesSync()),
+                    ElevatedButton(
+                        onPressed: generateImageThumbnail,
+                        child: const Text('Generate Image Thumbnails')),
+                    ElevatedButton(
+                        onPressed: generateGifThumbnail,
+                        child: const Text('Generate Gif Thumbnails')),
+                  ],
                 ),
               ),
-      ),
+            ),
     );
   }
 }

@@ -14,7 +14,7 @@ Add the following dependency to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  video_thumbnail_plugin: ^0.0.2+1
+  video_thumbnail_plugin: ^0.0.3
 ```
 
 If you want to use the latest version, add this instead:
@@ -43,9 +43,9 @@ String videoPath = '/path/to/your/video.mp4';
 String imageThumbnailPath = '/path/to/your/image_thumbnail.jpg';
 
 // Specify the format: 'jpg', 'png', or 'webp'
-String format = 'jpg';
+String format = ImageFormat.jpg;
 
-String? imageThumbnail = await VideoThumbnailPlugin.generateImageThumbnail(
+await VideoThumbnailPlugin.generateImageThumbnail(
   videoPath: videoPath,
   thumbnailPath: imageThumbnailPath,
   format: format,
@@ -54,7 +54,7 @@ String? imageThumbnail = await VideoThumbnailPlugin.generateImageThumbnail(
   quality: 95,
 );
 
-print('Image Thumbnail: $imageThumbnail');
+print('Image Thumbnail: $imageThumbnailPath');
 ```
 
 ### Generating GIF Thumbnail
@@ -63,7 +63,7 @@ print('Image Thumbnail: $imageThumbnail');
 String videoPath = '/path/to/your/video.mp4';
 String gifThumbnailPath = '/path/to/your/gif_thumbnail.gif';
 
-String? gifThumbnail = await VideoThumbnailPlugin.generateGifThumbnail(
+await VideoThumbnailPlugin.generateGifThumbnail(
   videoPath: videoPath,
   thumbnailPath: gifThumbnailPath,
   width: 100,
@@ -71,7 +71,7 @@ String? gifThumbnail = await VideoThumbnailPlugin.generateGifThumbnail(
   multiProcess: true, // Multi-process is used for generating GIF thumbnails, default is true
 );
 
-print('GIF Thumbnail: $gifThumbnail');
+print('GIF Thumbnail: $gifThumbnailPath');
 ```
 
 ## Platform-Specific Implementation

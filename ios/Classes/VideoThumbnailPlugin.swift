@@ -26,7 +26,7 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
             let width = args["width"] as? CGFloat
             let height = args["height"] as? CGFloat
             let format = args["format"] as? Int ?? 0
-            let quality = args["quality"] as? CGFloat ?? 1.0
+            let quality = args["quality"] as? CGFloat ?? 100.0
             
             let thumbnail = generateImageThumbnail(videoPath: videoPath, thumbnailPath: thumbnailPath, width: width, height: height, format: format, quality: quality)
             result(thumbnail)
@@ -143,6 +143,9 @@ extension UIImage {
         return resizedImage ?? self
     }
     func webpData(quality: CGFloat) -> Data? {
-        return SDImageWebPCoder.shared.encodedData(with: self, format: .webP, options: [.compressionQuality: quality])
+        let options: [SDImageCoderOption: Any] = [
+            .compressionQuality: quality // Compression quality (0.0 - 1.0)
+        ]
+        return SDImageWebPCoder.shared.encodedData(with: self, format: .webP, options: options)
     }
 }
