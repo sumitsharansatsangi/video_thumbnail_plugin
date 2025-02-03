@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail_plugin/video_thumbnail_plugin.dart';
 
 void main() =>
@@ -16,85 +17,41 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  String videoPath = '';
+  int selectedIndex = 0;
   String imageThumbnailPath = '';
   String gifThumbnailPath = '';
   bool isGenerating = false;
+  bool isGeneratedSuccessfully = false;
 
   @override
   void initState() {
     super.initState();
   }
 
-  Future<void> generateImageThumbnail() async {
+  Future<void> generateImageThumbnail(String videoPath) async {
+    // Generate image thumbnail
+    final status = await VideoThumbnailPlugin.generateImageThumbnail(
+      videoPath: videoPath,
+      thumbnailPath: imageThumbnailPath,
+      format: Format.jpg,
+    );
     setState(() {
-      isGenerating = true;
+      isGeneratedSuccessfully = status;
     });
-
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result != null && result.files.single.path != null) {
-      videoPath = result.files.single.path!;
-      imageThumbnailPath = '${result.files.single.path}.jpg';
-
-      // Generate image thumbnail
-      await VideoThumbnailPlugin.generateImageThumbnail(
-        videoPath: videoPath,
-        thumbnailPath: imageThumbnailPath,
-        format: Format.jpg,
-      );
-      debugPrint('Image Thumbnail: $imageThumbnailPath');
-      setState(() {});
-    } else {
-      Future.delayed(Duration.zero, () {
-        if (mounted && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No file selected'),
-            ),
-          );
-        }
-      });
-    }
-
-    setState(() {
-      isGenerating = false;
-    });
+    debugPrint('Image Thumbnail: $imageThumbnailPath');
   }
 
-  Future<void> generateGifThumbnail() async {
+  Future<void> generateGifThumbnail(String videoPath) async {
+    // Generate GIF thumbnail
+  final status = await VideoThumbnailPlugin.generateGifThumbnail(
+      videoPath: videoPath,
+      thumbnailPath: gifThumbnailPath,
+      frameCount: 10, // Specify the number of frames here
+    );
     setState(() {
-      isGenerating = true;
+      isGeneratedSuccessfully = status;
     });
-
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result != null && result.files.single.path != null) {
-      videoPath = result.files.single.path!;
-      gifThumbnailPath = '${result.files.single.path}.gif';
-
-      // Generate GIF thumbnail
-      await VideoThumbnailPlugin.generateGifThumbnail(
-        videoPath: videoPath,
-        thumbnailPath: gifThumbnailPath,
-        frameCount: 10, // Specify the number of frames here
-      );
-      debugPrint('GIF Thumbnail: $gifThumbnailPath');
-
-      setState(() {});
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No file selected'),
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      isGenerating = false;
-    });
+    debugPrint('GIF Thumbnail: $gifThumbnailPath');
   }
 
   @override
@@ -117,15 +74,142 @@ class MyAppState extends State<MyApp> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      RadioMenuButton(
+                        value: 0,
+                        groupValue: selectedIndex,
+                        onChanged: (value) {
+                          imageThumbnailPath = '';
+                          gifThumbnailPath = '';
+                          if (value == null) return;
+                          setState(() {
+                            selectedIndex = value;
+                          });
+                        },
+                        child: const Text('File'),
+                      ),
+                      RadioMenuButton(
+                        value: 1,
+                        groupValue: selectedIndex,
+                        onChanged: (value) {
+                          imageThumbnailPath = '';
+                          gifThumbnailPath = '';
+                          if (value == null) return;
+                          setState(() {
+                            selectedIndex = value;
+                          });
+                        },
+                        child: const Text('Asset'),
+                      ),
+                      RadioMenuButton(
+                        value: 2,
+                        groupValue: selectedIndex,
+                        onChanged: (value) {
+                          imageThumbnailPath = '';
+                          gifThumbnailPath = '';
+                          if (value == null) return;
+                          setState(() {
+                            selectedIndex = value;
+                          });
+                        },
+                        child: const Text('Network'),
+                      ),
+                    ]),
                     if (imageThumbnailPath.isNotEmpty)
                       Image.file(File(imageThumbnailPath)),
                     if (gifThumbnailPath.isNotEmpty)
                       GifView.memory(File(gifThumbnailPath).readAsBytesSync()),
+                    SizedBox(height: 20),
                     ElevatedButton(
-                        onPressed: generateImageThumbnail,
+                        onPressed: () async {
+                          gifThumbnailPath = '';
+                          setState(() {
+                            isGenerating = true;
+                          });
+                          if (selectedIndex == 0) {
+                            FilePickerResult? result = await FilePicker.platform
+                                .pickFiles(type: FileType.video);
+                            if (result != null &&
+                                result.files.single.path != null) {
+                              imageThumbnailPath =
+                                  '${result.files.single.path!}.jpg';
+                              await generateImageThumbnail(
+                                  result.files.single.path!);
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('No file selected'),
+                                  ),
+                                );
+                              }
+                            }
+                          } else if (selectedIndex == 1) {
+                            final temp = await getTemporaryDirectory();
+                            imageThumbnailPath =
+                                (await File('${temp.path}/video.mp4.jpg')
+                                        .create(recursive: true))
+                                    .path;
+                            generateImageThumbnail("assets/mov_bbb.mp4");
+                          } else if (selectedIndex == 2) {
+                            final temp = await getTemporaryDirectory();
+                            imageThumbnailPath =
+                                (await File('${temp.path}/video.mp4.jpg')
+                                        .create(recursive: true))
+                                    .path;
+                            generateImageThumbnail(
+                                "https://www.w3schools.com/html/mov_bbb.mp4");
+                          }
+                          setState(() {
+                            isGenerating = false;
+                          });
+                        },
                         child: const Text('Generate Image Thumbnails')),
                     ElevatedButton(
-                        onPressed: generateGifThumbnail,
+                        onPressed: () async {
+                          imageThumbnailPath = '';
+                          setState(() {
+                            isGenerating = true;
+                          });
+
+                          if (selectedIndex == 0) {
+                            FilePickerResult? result = await FilePicker.platform
+                                .pickFiles(type: FileType.video);
+                            if (result != null &&
+                                result.files.single.path != null) {
+                              gifThumbnailPath =
+                                  '${result.files.single.path!}.gif';
+                              await generateGifThumbnail(
+                                  result.files.single.path!);
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('No file selected'),
+                                  ),
+                                );
+                              }
+                            }
+                          } else if (selectedIndex == 1) {
+                            final temp = await getTemporaryDirectory();
+                            gifThumbnailPath =
+                                (await File('${temp.path}/video.mp4.gif')
+                                        .create(recursive: true))
+                                    .path;
+                            generateGifThumbnail("assets/mov_bbb.mp4");
+                          } else if (selectedIndex == 2) {
+                            final temp = await getTemporaryDirectory();
+                            gifThumbnailPath =
+                                (await File('${temp.path}/video.mp4.gif')
+                                        .create(recursive: true))
+                                    .path;
+                            generateGifThumbnail(
+                                "https://www.w3schools.com/html/mov_bbb.mp4");
+                          }
+                          setState(() {
+                            isGenerating = false;
+                          });
+                        },
                         child: const Text('Generate Gif Thumbnails')),
                   ],
                 ),

@@ -8,13 +8,17 @@ class VideoThumbnailPlugin {
 
   /// Generates an image thumbnail from a video.
   ///
-  /// [videoPath] is the path to the video file.
-  /// [thumbnailPath] is the path where the generated thumbnail image will be saved.
-  /// [width] is the optional width for the thumbnail image.
-  /// [height] is the optional height for the thumbnail image.
-  /// [quality] is the optional quality for the thumbnail image (1-100).
-  /// [format] is the format of the thumbnail image (default is PNG).
-  static Future<void> generateImageThumbnail({
+  /// This method generates a thumbnail image from a specified video file.
+  ///
+  /// [videoPath] specifies the path to the video file from which to generate the thumbnail.
+  /// [thumbnailPath] specifies the path where the generated thumbnail image will be saved.
+  /// [width] is an optional parameter that specifies the desired width of the thumbnail image. If null, the width will be proportional to the video's aspect ratio.
+  /// [height] is an optional parameter that specifies the desired height of the thumbnail image. If null, the height will be proportional to the video's aspect ratio.
+  /// [quality] is an optional parameter that specifies the quality of the thumbnail image, with a range from 1 to 100. Higher values indicate better quality.
+  /// [format] specifies the format of the thumbnail image. The default format is PNG. Supported formats are PNG, JPG, and WEBP.
+  ///
+  /// Returns a [Future] that completes with `true` if the thumbnail is generated successfully, otherwise `false`.
+  static Future<bool> generateImageThumbnail({
     required String videoPath,
     required String thumbnailPath,
     int? width,
@@ -22,28 +26,31 @@ class VideoThumbnailPlugin {
     int? quality,
     Format format = Format.png, // Can be "png", "jpg", or "webp"
   }) async {
-    await _channel.invokeMethod('generateImageThumbnail', {
+    return await _channel.invokeMethod<bool>('generateImageThumbnail', {
       'videoPath': videoPath,
       'thumbnailPath': thumbnailPath,
       'format': format.index,
       'width': width,
       'height': height,
       'quality': quality,
-    });
+    }) ?? false;
   }
 
   /// Generates a GIF thumbnail from a video.
   ///
-  /// [videoPath] is the path to the video file.
-  /// [thumbnailPath] is the path where the generated GIF thumbnail will be saved.
-  /// [width] is the optional width for the GIF thumbnail.
-  /// [height] is the optional height for the GIF thumbnail.
-  /// [frameCount] is the optional number of frames to include in the GIF.
-  /// [quality] is the optional quality for the GIF frames.
-  /// [delay] is the optional delay between frames in milliseconds.
-  /// [repeat] is the optional number of times the GIF should repeat (0 means repeat forever, default is 0).
-  /// [multiProcess] is a flag indicating whether to use multiprocessing for GIF generation (default is true).
-  static Future<void> generateGifThumbnail({
+  /// This method generates a GIF thumbnail from a specified video file by extracting multiple frames.
+  ///
+  /// [videoPath] specifies the path to the video file from which to generate the GIF thumbnail.
+  /// [thumbnailPath] specifies the path where the generated GIF thumbnail will be saved.
+  /// [width] is an optional parameter that specifies the desired width of the GIF thumbnail. If null, the width will be proportional to the video's aspect ratio.
+  /// [height] is an optional parameter that specifies the desired height of the GIF thumbnail. If null, the height will be proportional to the video's aspect ratio.
+  /// [frameCount] is an optional parameter that specifies the number of frames to include in the GIF. More frames result in a smoother GIF.
+  /// [quality] is an optional parameter that specifies the quality of the GIF frames, with a range from 1 to 100. Higher values indicate better quality.
+  /// [delay] is an optional parameter that specifies the delay between frames in milliseconds.
+  /// [repeat] is an optional parameter that specifies the number of times the GIF should repeat. A value of 0 means repeat forever.
+ ///
+  /// Returns a [Future] that completes with `true` if the GIF thumbnail is generated successfully, otherwise `false`.
+  static Future<bool> generateGifThumbnail({
     required String videoPath,
     required String thumbnailPath,
     int? width,
@@ -52,9 +59,8 @@ class VideoThumbnailPlugin {
     int? quality,
     int? delay,
     int? repeat = 0, // 0 means repeat forever
-    bool multiProcess = true,
   }) async {
-    await _channel.invokeMethod('generateGifThumbnail', {
+    return await _channel.invokeMethod<bool>('generateGifThumbnail', {
       'videoPath': videoPath,
       'thumbnailPath': thumbnailPath,
       'width': width,
@@ -63,8 +69,7 @@ class VideoThumbnailPlugin {
       'quality': quality,
       'delay': delay,
       'repeat': repeat,
-      'multiProcess': multiProcess,
-    });
+    }) ?? false;
   }
 }
 

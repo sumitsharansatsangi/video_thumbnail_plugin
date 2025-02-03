@@ -14,7 +14,7 @@ Add the following dependency to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  video_thumbnail_plugin: ^0.0.3
+  video_thumbnail_plugin: ^0.0.4
 ```
 
 If you want to use the latest version, add this instead:
@@ -45,16 +45,20 @@ String imageThumbnailPath = '/path/to/your/image_thumbnail.jpg';
 // Specify the format: 'jpg', 'png', or 'webp'
 String format = ImageFormat.jpg;
 
-await VideoThumbnailPlugin.generateImageThumbnail(
-  videoPath: videoPath,
-  thumbnailPath: imageThumbnailPath,
-  format: format,
-  width: 100,
-  height: 100,
-  quality: 95,
+final status = await VideoThumbnailPlugin.generateImageThumbnail(
+  videoPath: videoPath, // Specify the path or url to the video file from which to generate the thumbnail.
+  thumbnailPath: imageThumbnailPath, // Specify the path where the generated thumbnail image will be saved.
+  format: format, // Specify the format: 'jpg', 'png', or 'webp'
+  width: 100, // Specify the width of the thumbnail
+  height: 100, // Specify the height of the thumbnail
+  quality: 95, // Specify the quality of the thumbnail image, with a range from 1 to 100. Higher values indicate better quality.
 );
 
-print('Image Thumbnail: $imageThumbnailPath');
+if(status) {
+  print('Image Thumbnail: $imageThumbnailPath');
+} else {
+  print('Image Thumbnail generation failed');
+}
 ```
 
 ### Generating GIF Thumbnail
@@ -63,15 +67,19 @@ print('Image Thumbnail: $imageThumbnailPath');
 String videoPath = '/path/to/your/video.mp4';
 String gifThumbnailPath = '/path/to/your/gif_thumbnail.gif';
 
-await VideoThumbnailPlugin.generateGifThumbnail(
-  videoPath: videoPath,
-  thumbnailPath: gifThumbnailPath,
-  width: 100,
-  height: 100,
-  multiProcess: true, // Multi-process is used for generating GIF thumbnails, default is true
+final status = await VideoThumbnailPlugin.generateGifThumbnail(
+  videoPath: videoPath, // Specify the path or url to the video file from which to generate the GIF thumbnail.
+  thumbnailPath: gifThumbnailPath, // Specify the path where the generated GIF thumbnail will be saved.
+  width: 100, // Specify the width of the thumbnail
+  height: 100, // Specify the height of the thumbnail
+  frameCount: 10, // Specify the number of frames here
+  delay: 100, // Specify the delay between frames in milliseconds
 );
-
-print('GIF Thumbnail: $gifThumbnailPath');
+if(status) {
+  print('GIF Thumbnail: $gifThumbnailPath');
+} else {
+  print('GIF Thumbnail generation failed');
+}
 ```
 
 ## Platform-Specific Implementation
