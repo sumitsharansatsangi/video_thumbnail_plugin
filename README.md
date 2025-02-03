@@ -94,6 +94,20 @@ if(status) {
 - Uses `AVAssetImageGenerator` to extract frames from the video.
 - Encodes frames into GIF using `ImageIO`.
 
+## Author
+
+- [**Sumit Kumar**](https://github.com/sumitsharansatsangi)
+
+  <a href="https://github.com/sumitsharansatsangi">
+  <img src="https://avatars.githubusercontent.com/u/45959281?v=4" width="100px;" alt=""/>
+  </a>
+
+## Support this project
+
+Please ⭐️ this repository if this project helped you!
+
+If you find any bugs or issues while using the plugin, please register an issues on GitHub. You can also contact us at sharansumitkumar@gmail.com.
+
 ## Contributions
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.
@@ -101,7 +115,3 @@ Contributions are welcome! Please open an issue or submit a pull request on GitH
 ## License
 
 MIT License
-
----
-
-Feel free to customize the repository URL and add any additional sections or information you think might be useful. Let me know if you need any more help!
