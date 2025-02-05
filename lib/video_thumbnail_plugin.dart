@@ -66,7 +66,6 @@ class VideoThumbnailPlugin {
       'width': width,
       'height': height,
       'frameCount': frameCount,
-      'quality': quality,
       'delay': delay,
       'repeat': repeat,
     }) ?? false;

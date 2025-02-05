@@ -8,8 +8,6 @@ import SDWebImageWebPCoder
 
 public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
     
-    private var channel: FlutterMethodChannel?
-    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "video_thumbnail_plugin", binaryMessenger: registrar.messenger())
         let instance = VideoThumbnailPlugin()
