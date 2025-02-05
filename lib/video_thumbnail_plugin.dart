@@ -56,7 +56,6 @@ class VideoThumbnailPlugin {
     int? width,
     int? height,
     int? frameCount,
-    int? quality,
     int? delay,
     int? repeat = 0, // 0 means repeat forever
   }) async {
