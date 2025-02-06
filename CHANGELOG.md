@@ -1,3 +1,7 @@
+## 0.0.5
+* Android Performance improvements.
+* IOS Bug Fixes.
+
 ## 0.0.4
 
 * Added support for generating GIF thumbnails and Image from video files or URL or Assets.

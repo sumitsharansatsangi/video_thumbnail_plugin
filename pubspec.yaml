@@ -1,6 +1,6 @@
 name: video_thumbnail_plugin
 description: "Plugin for generating image and GIF thumbnails from video files from Local, Asset, and Network."
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/sumitsharansatsangi/video_thumbnail_plugin
 repository: https://github.com/sumitsharansatsangi/video_thumbnail_plugin
 issue_tracker: https://github.com/sumitsharansatsangi/video_thumbnail_plugin/issues

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:gif_view/gif_view.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail_plugin/video_thumbnail_plugin.dart';
 
@@ -118,7 +117,7 @@ class MyAppState extends State<MyApp> {
                     if (imageThumbnailPath.isNotEmpty)
                       Image.file(File(imageThumbnailPath)),
                     if (gifThumbnailPath.isNotEmpty)
-                      GifView.memory(File(gifThumbnailPath).readAsBytesSync()),
+                      Image.file(File(gifThumbnailPath)),
                     SizedBox(height: 20),
                     ElevatedButton(
                         onPressed: () async {
