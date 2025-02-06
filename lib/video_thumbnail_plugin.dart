@@ -21,9 +21,9 @@ class VideoThumbnailPlugin {
   static Future<bool> generateImageThumbnail({
     required String videoPath,
     required String thumbnailPath,
-    int? width,
-    int? height,
-    int? quality,
+    int width=320,
+    int height=240,
+    int quality= 100,
     Format format = Format.png, // Can be "png", "jpg", or "webp"
   }) async {
     return await _channel.invokeMethod<bool>('generateImageThumbnail', {
@@ -53,11 +53,11 @@ class VideoThumbnailPlugin {
   static Future<bool> generateGifThumbnail({
     required String videoPath,
     required String thumbnailPath,
-    int? width,
-    int? height,
-    int? frameCount,
-    int? delay,
-    int? repeat = 0, // 0 means repeat forever
+    int width =320,
+    int height=240,
+    int frameCount =10,
+    int delay =100,
+    int repeat = 0, // 0 means repeat forever
   }) async {
     return await _channel.invokeMethod<bool>('generateGifThumbnail', {
       'videoPath': videoPath,

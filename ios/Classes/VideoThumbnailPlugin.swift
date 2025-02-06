@@ -7,7 +7,6 @@ import MobileCoreServices
 import SDWebImageWebPCoder
 
 public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
-    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "video_thumbnail_plugin", binaryMessenger: registrar.messenger())
         let instance = VideoThumbnailPlugin()
@@ -16,145 +15,139 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "generateImageThumbnail":
-            handleImageThumbnail(call: call, result: result)
         case "generateGifThumbnail":
-            handleGifThumbnail(call: call, result: result)
+            guard let args = call.arguments as? [String: Any],
+                  let videoPath = args["videoPath"] as? String,
+                  let thumbnailPath = args["thumbnailPath"] as? String,
+                  let frameCount = args["frameCount"] as? Int else {
+                result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing required parameters", details: nil))
+                return
+            }
+            
+            let width = args["width"] as? Int
+            let height = args["height"] as? Int
+            let delay = args["delay"] as? Int ?? 100
+            let repeatCount = args["repeat"] as? Int ?? 0
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.handleVideoInput(videoPath: videoPath) { localPath in
+                    if let localPath = localPath {
+                        let success = self.generateGifThumbnail(videoPath: localPath, thumbnailPath: thumbnailPath, width: width, height: height, frameCount: frameCount, delay: delay, repeatCount: repeatCount)
+                        DispatchQueue.main.async {
+                            result(success)
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            result(FlutterError(code: "DOWNLOAD_FAILED", message: "Failed to download video", details: nil))
+                        }
+                    }
+                }
+            }
+        case "generateImageThumbnail":
+            guard let args = call.arguments as? [String: Any],
+                  let videoPath = args["videoPath"] as? String,
+                  let thumbnailPath = args["thumbnailPath"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing required parameters", details: nil))
+                return
+            }
+            
+            let timeMs = args["timeMs"] as? Int ?? 1000
+            let width = args["width"] as? Int
+            let height = args["height"] as? Int
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.handleVideoInput(videoPath: videoPath) { localPath in
+                    if let localPath = localPath {
+                        let success = self.generateImageThumbnail(videoPath: localPath, thumbnailPath: thumbnailPath, timeMs: timeMs, width: width, height: height)
+                        DispatchQueue.main.async {
+                            result(success)
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            result(FlutterError(code: "DOWNLOAD_FAILED", message: "Failed to download video", details: nil))
+                        }
+                    }
+                }
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
     }
     
-    private func handleImageThumbnail(call: FlutterMethodCall, result: @escaping FlutterResult) {
-        guard let arguments = call.arguments as? [String: Any],
-              let videoPath = arguments["videoPath"] as? String,
-              let thumbnailPath = arguments["thumbnailPath"] as? String,
-              let width = arguments["width"] as? Int,
-              let height = arguments["height"] as? Int,
-              let format = arguments["format"] as? Int,
-              let quality = arguments["quality"] as? Int else {
-            result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing required parameters", details: nil))
+    private func handleVideoInput(videoPath: String, completion: @escaping (String?) -> Void) {
+        if videoPath.starts(with: "http") {
+            downloadVideo(from: videoPath, completion: completion)
+        } else {
+            completion(videoPath)
+        }
+    }
+    
+    private func downloadVideo(from url: String, completion: @escaping (String?) -> Void) {
+        guard let videoURL = URL(string: url) else {
+            completion(nil)
             return
         }
+        let tempFileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mp4")
         
-        DispatchQueue.global(qos: .background).async {
-            let success = self.generateImageThumbnail(videoPath: videoPath, thumbnailPath: thumbnailPath, width: width, height: height, format: format, quality: quality)
-            DispatchQueue.main.async {
-                result(success)
+        let task = URLSession.shared.downloadTask(with: videoURL) { location, response, error in
+            if let location = location {
+                do {
+                    try FileManager.default.moveItem(at: location, to: tempFileURL)
+                    completion(tempFileURL.path)
+                } catch {
+                    completion(nil)
+                }
+            } else {
+                completion(nil)
             }
         }
+        task.resume()
     }
     
-    private func handleGifThumbnail(call: FlutterMethodCall, result: @escaping FlutterResult) {
-        guard let arguments = call.arguments as? [String: Any],
-              let videoPath = arguments["videoPath"] as? String,
-              let thumbnailPath = arguments["thumbnailPath"] as? String,
-              let width = arguments["width"] as? Int,
-              let height = arguments["height"] as? Int,
-              let frameCount = arguments["frameCount"] as? Int,
-              let delay = arguments["delay"] as? Int,
-              let repeatCount = arguments["repeat"] as? Int else {
-            result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing required parameters", details: nil))
-            return
-        }
-        
-        DispatchQueue.global(qos: .background).async {
-            let success = self.generateGifThumbnail(videoPath: videoPath, thumbnailPath: thumbnailPath, width: width, height: height, frameCount: frameCount, delay: delay, repeatCount: repeatCount)
-            DispatchQueue.main.async {
-                result(success)
-            }
-        }
-    }
-    
-    private func generateImageThumbnail(videoPath: String, thumbnailPath: String, width: Int, height: Int, format: Int, quality: Int) -> Bool {
-        let asset = AVAsset(url: URL(fileURLWithPath: videoPath))
-        let assetImageGenerator = AVAssetImageGenerator(asset: asset)
-        assetImageGenerator.appliesPreferredTrackTransform = true
-        
-        let time = CMTime(seconds: 1, preferredTimescale: 600)
-        
-        do {
-            let cgImage = try assetImageGenerator.copyCGImage(at: time, actualTime: nil)
-            var image = UIImage(cgImage: cgImage)
-            
-            image = resizeImage(image: image, width: width, height: height)
-            return saveImage(image: image, path: thumbnailPath, format: format, quality: quality)
-        } catch {
-            print("Error generating image thumbnail: \(error.localizedDescription)")
-            return false
-        }
-    }
-    
-    private func generateGifThumbnail(videoPath: String, thumbnailPath: String, width: Int, height: Int, frameCount: Int, delay: Int, repeatCount: Int) -> Bool {
-        let asset = AVAsset(url: URL(fileURLWithPath: videoPath))
-        let assetImageGenerator = AVAssetImageGenerator(asset: asset)
-        assetImageGenerator.appliesPreferredTrackTransform = true
-        
-        let duration = asset.duration.seconds
+    private func generateGifThumbnail(videoPath: String, thumbnailPath: String, width: Int?, height: Int?, frameCount: Int, delay: Int, repeatCount: Int) -> Bool {
+        guard let asset = AVURLAsset(url: URL(fileURLWithPath: videoPath)) else { return false }
+        let generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        let duration = CMTimeGetSeconds(asset.duration)
         let frameInterval = duration / Double(frameCount)
         
-        let gifProperties: [String: Any] = [
-            kCGImagePropertyGIFDictionary as String: [
-                kCGImagePropertyGIFDelayTime as String: delay / 1000.0,
-                kCGImagePropertyGIFLoopCount as String: repeatCount
-            ]
-        ]
+        let fileURL = URL(fileURLWithPath: thumbnailPath)
+        guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, kUTTypeGIF, frameCount, nil) else { return false }
         
-        let destinationURL = URL(fileURLWithPath: thumbnailPath)
-        let destination = CGImageDestinationCreateWithURL(destinationURL as CFURL, kUTTypeGIF, frameCount, nil)
+        let gifProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: repeatCount]]
+        CGImageDestinationSetProperties(destination, gifProperties as CFDictionary)
         
         for i in 0..<frameCount {
-            let time = CMTime(seconds: frameInterval * Double(i), preferredTimescale: 600)
+            let time = CMTimeMakeWithSeconds(Double(i) * frameInterval, preferredTimescale: 600)
             do {
-                let cgImage = try assetImageGenerator.copyCGImage(at: time, actualTime: nil)
-                var image = UIImage(cgImage: cgImage)
-                
-                image = resizeImage(image: image, width: width, height: height)
-                CGImageDestinationAddImage(destination!, image.cgImage!, gifProperties as CFDictionary)
+                let imageRef = try generator.copyCGImage(at: time, actualTime: nil)
+                let resizedImage = resizeImage(imageRef, width: width, height: height)
+                let frameProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delay / 1000.0]]
+                CGImageDestinationAddImage(destination, resizedImage, frameProperties as CFDictionary)
             } catch {
-                print("Error generating GIF thumbnail: \(error.localizedDescription)")
-                return false
+                print("Failed to get frame at time: \(time)")
             }
         }
         
-        return CGImageDestinationFinalize(destination!)
+        return CGImageDestinationFinalize(destination)
     }
     
-    private func resizeImage(image: UIImage, width: Int?, height: Int?) -> UIImage {
-        var newWidth = width
-        var newHeight = height
-        
-        if newWidth == nil && newHeight == nil {
-            return image
-        }
-        
-        if let newWidth = newWidth {
-            let aspectRatio = image.size.height / image.size.width
-            newHeight = Int(Double(newWidth) * aspectRatio)
-        }
-        
-        if let newHeight = newHeight {
-            let aspectRatio = image.size.width / image.size.height
-            newWidth = Int(Double(newHeight) * aspectRatio)
-        }
-        
-        UIGraphicsBeginImageContext(CGSize(width: newWidth!, height: newHeight!))
-        image.draw(in: CGRect(x: 0, y: 0, width: newWidth!, height: newHeight!))
-        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return resizedImage ?? image
-    }
-    
-    private func saveImage(image: UIImage, path: String, format: Int, quality: Int) -> Bool {
-        guard let data = image.jpegData(compressionQuality: CGFloat(quality) / 100.0) else { return false }
+    private func generateImageThumbnail(videoPath: String, thumbnailPath: String, timeMs: Int, width: Int?, height: Int?) -> Bool {
+        guard let asset = AVURLAsset(url: URL(fileURLWithPath: videoPath)) else { return false }
+        let generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        let time = CMTimeMakeWithSeconds(Double(timeMs) / 1000.0, preferredTimescale: 600)
         
         do {
-            try data.write(to: URL(fileURLWithPath: path))
+            let imageRef = try generator.copyCGImage(at: time, actualTime: nil)
+            let resizedImage = resizeImage(imageRef, width: width, height: height)
+            let imageData = UIImage(cgImage: resizedImage).pngData()
+            try imageData?.write(to: URL(fileURLWithPath: thumbnailPath))
             return true
         } catch {
-            print("Error saving image: \(error.localizedDescription)")
+            print("Failed to generate image thumbnail")
             return false
         }
     }
 }
+
