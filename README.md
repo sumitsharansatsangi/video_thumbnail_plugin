@@ -2,6 +2,16 @@
 
 A Flutter plugin to generate image and GIF thumbnails from video files. This plugin supports multiple image formats including JPEG, PNG, and WebP.
 
+[![pub ver](https://img.shields.io/badge/pub-v0.0.4+2-blue)](https://pub.dev/packages/video_thumbnail_plugin)
+  [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/sumitsharansatsangi/video_thumbnail_plugin/blob/master/LICENSE)
+  [![GitHub stars](https://img.shields.io/github/stars/sumitsharansatsangi/video_thumbnail_plugin?style=social)](https://github.com/sumitsharansatsangi/video_thumbnail_plugin)
+<p >
+  <img src="https://raw.githubusercontent.com/sumitsharansatsangi/video_thumbnail_plugin/refs/heads/main/Screenshot%20From%202025-02-07%2011-24-59.png" />
+   <video  controls>
+    <source src="https://raw.githubusercontent.com/sumitsharansatsangi/video_thumbnail_plugin/refs/heads/main/Screencast%20From%202025-02-07%2011-21-45.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</p>
 ## Features
 
 - Generate image thumbnails from video files in JPEG, PNG, and WebP formats.
