@@ -110,44 +110,54 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
         task.resume()
     }
     
-    private func generateGifThumbnail(videoPath: String, thumbnailPath: String, width: Int?, height: Int?, frameCount: Int, delay: Int, repeatCount: Int) -> Bool {
-        let asset = AVURLAsset(url: URL(fileURLWithPath: videoPath))
-        if asset.isPlayable == false {
-            // print("Video asset is not playable.")
-            return false
-        }
+   private func generateGifThumbnail(videoPath: String, thumbnailPath: String, width: Int?, height: Int?, frameCount: Int, delay: Int, repeatCount: Int) -> Bool {
+    let asset = AVURLAsset(url: URL(fileURLWithPath: videoPath))
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+    let duration = CMTimeGetSeconds(asset.duration)
+    let frameInterval = duration / Double(frameCount)
 
-        let generator = AVAssetImageGenerator(asset: asset)
-        generator.appliesPreferredTrackTransform = true
-        let duration = CMTimeGetSeconds(asset.duration)
-        let frameInterval = duration / Double(frameCount)
-        
-        let fileURL = URL(fileURLWithPath: thumbnailPath)
-        guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, kUTTypeGIF, frameCount, nil) else {
-            print("Failed to create GIF destination")
+    let fileURL = URL(fileURLWithPath: thumbnailPath)
+    guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, kUTTypeGIF, frameCount, nil) else { return false }
+
+    let gifProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: repeatCount]]
+    CGImageDestinationSetProperties(destination, gifProperties as CFDictionary)
+
+    for i in 0..<frameCount {
+        let time = CMTimeMakeWithSeconds(Double(i) * frameInterval, preferredTimescale: 600)
+        do {
+            let imageRef = try generator.copyCGImage(at: time, actualTime: nil)
+            let resizedImage = resizeImage(imageRef, width: width, height: height)
+            let frameProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delay / 1000]]
+            if resizedImage != nil {
+                CGImageDestinationAddImage(destination, resizedImage!, frameProperties as CFDictionary)
+            } else {
+                return false
+            }
+            
+        } catch {
+            print("Failed to get frame at time: \(time)")
             return false
         }
-        
-        let gifProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: repeatCount]]
-        CGImageDestinationSetProperties(destination, gifProperties as CFDictionary)
-        
-        for i in 0..<frameCount {
-            let time = CMTimeMakeWithSeconds(Double(i) * frameInterval, preferredTimescale: 600)
-            do {
-                let imageRef = try generator.copyCGImage(at: time, actualTime: nil)
-                guard let resizedImage = resizeImage(imageRef, width: width, height: height) else {
-                    // print("Failed to resize image at frame \(i)")
-                    continue
-                }
-                let frameProperties = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delay / 1000]]
-                CGImageDestinationAddImage(destination, resizedImage, frameProperties as CFDictionary)
-            } catch {
-                print("Failed to get frame at time: \(time)")
-            }
-        }
-        
-        return CGImageDestinationFinalize(destination)
     }
+
+    let success = CGImageDestinationFinalize(destination)
+
+    if success {
+        // Ensure the GIF file is not empty
+        if FileManager.default.fileExists(atPath: fileURL.path),
+           let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
+           let fileSize = attributes[.size] as? Int, fileSize > 0 {
+            return true
+        } else {
+            print("Error: Generated GIF file is empty")
+            return false
+        }
+    }
+
+    return false
+}
+
     
     private func generateImageThumbnail(videoPath: String, thumbnailPath: String, timeMs: Int, width: Int?, height: Int?) -> Bool {
          let asset = AVURLAsset(url: URL(fileURLWithPath: videoPath))

@@ -1,3 +1,6 @@
+## 0.0.4+1
+* Bug Fixes for IOS.
+
 ## 0.0.4
 
 * Added support for generating GIF thumbnails and Image from video files or URL or Assets.

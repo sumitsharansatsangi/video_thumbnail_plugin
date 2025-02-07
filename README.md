@@ -14,7 +14,7 @@ Add the following dependency to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  video_thumbnail_plugin: ^0.0.4
+  video_thumbnail_plugin: ^0.0.4+1
 ```
 
 If you want to use the latest version, add this instead:
