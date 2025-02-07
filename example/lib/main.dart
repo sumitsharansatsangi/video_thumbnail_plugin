@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail_plugin/video_thumbnail_plugin.dart';
 
@@ -28,6 +29,9 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> generateImageThumbnail(String videoPath) async {
+    setState(() {
+      isGeneratedSuccessfully = false;
+    });
     // Generate image thumbnail
     final status = await VideoThumbnailPlugin.generateImageThumbnail(
       videoPath: videoPath,
@@ -41,8 +45,11 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> generateGifThumbnail(String videoPath) async {
+    setState(() {
+      isGeneratedSuccessfully = false;
+    });
     // Generate GIF thumbnail
-  final status = await VideoThumbnailPlugin.generateGifThumbnail(
+    final status = await VideoThumbnailPlugin.generateGifThumbnail(
       videoPath: videoPath,
       thumbnailPath: gifThumbnailPath,
       frameCount: 10, // Specify the number of frames here
@@ -114,10 +121,15 @@ class MyAppState extends State<MyApp> {
                         child: const Text('Network'),
                       ),
                     ]),
-                    if (imageThumbnailPath.isNotEmpty)
-                      Image.file(File(imageThumbnailPath)),
-                    if (gifThumbnailPath.isNotEmpty)
-                      Image.file(File(gifThumbnailPath)),
+                    if (imageThumbnailPath.isNotEmpty &&
+                        isGeneratedSuccessfully)
+                      Image.file(File(imageThumbnailPath))
+                    else
+                      Text("No Image Thumbnail Generated"),
+                    if (gifThumbnailPath.isNotEmpty && isGeneratedSuccessfully)
+                      Image.file(File(gifThumbnailPath))
+                    else
+                      Text("No Gif Thumbnail Generated"),
                     SizedBox(height: 20),
                     ElevatedButton(
                         onPressed: () async {
@@ -149,14 +161,15 @@ class MyAppState extends State<MyApp> {
                                 (await File('${temp.path}/video.mp4.jpg')
                                         .create(recursive: true))
                                     .path;
-                            generateImageThumbnail("assets/mov_bbb.mp4");
+                            await generateImageThumbnail(
+                                await getTempPath("assets/mov_bbb.mp4"));
                           } else if (selectedIndex == 2) {
                             final temp = await getTemporaryDirectory();
                             imageThumbnailPath =
                                 (await File('${temp.path}/video.mp4.jpg')
                                         .create(recursive: true))
                                     .path;
-                            generateImageThumbnail(
+                            await generateImageThumbnail(
                                 "https://www.w3schools.com/html/mov_bbb.mp4");
                           }
                           setState(() {
@@ -195,14 +208,15 @@ class MyAppState extends State<MyApp> {
                                 (await File('${temp.path}/video.mp4.gif')
                                         .create(recursive: true))
                                     .path;
-                            generateGifThumbnail("assets/mov_bbb.mp4");
+                            await generateGifThumbnail(
+                                await getTempPath("assets/mov_bbb.mp4"));
                           } else if (selectedIndex == 2) {
                             final temp = await getTemporaryDirectory();
                             gifThumbnailPath =
                                 (await File('${temp.path}/video.mp4.gif')
                                         .create(recursive: true))
                                     .path;
-                            generateGifThumbnail(
+                            await generateGifThumbnail(
                                 "https://www.w3schools.com/html/mov_bbb.mp4");
                           }
                           setState(() {
@@ -215,5 +229,15 @@ class MyAppState extends State<MyApp> {
               ),
             ),
     );
+  }
+
+  Future<String> getTempPath(String path) async {
+    final tempDir = await getTemporaryDirectory();
+    final tempVideoFile = File('${tempDir.path}/video.mp4');
+
+    // Copy asset video to the temporary directory
+    final byteData = await rootBundle.load(path);
+    return (await tempVideoFile.writeAsBytes(byteData.buffer.asUint8List()))
+        .path;
   }
 }

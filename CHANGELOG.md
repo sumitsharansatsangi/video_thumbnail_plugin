@@ -1,3 +1,6 @@
+## 0.0.4+2
+* Bug Fixes for Android.
+
 ## 0.0.4+1
 * Bug Fixes for IOS.
 

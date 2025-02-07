@@ -21,19 +21,20 @@ class VideoThumbnailPlugin {
   static Future<bool> generateImageThumbnail({
     required String videoPath,
     required String thumbnailPath,
-    int width=320,
-    int height=240,
-    int quality= 100,
+    int width = 320,
+    int height = 240,
+    int quality = 100,
     Format format = Format.png, // Can be "png", "jpg", or "webp"
   }) async {
     return await _channel.invokeMethod<bool>('generateImageThumbnail', {
-      'videoPath': videoPath,
-      'thumbnailPath': thumbnailPath,
-      'format': format.index,
-      'width': width,
-      'height': height,
-      'quality': quality,
-    }) ?? false;
+          'videoPath': videoPath,
+          'thumbnailPath': thumbnailPath,
+          'format': format.index,
+          'width': width,
+          'height': height,
+          'quality': quality,
+        }) ??
+        false;
   }
 
   /// Generates a GIF thumbnail from a video.
@@ -48,26 +49,27 @@ class VideoThumbnailPlugin {
   /// [quality] is an optional parameter that specifies the quality of the GIF frames, with a range from 1 to 100. Higher values indicate better quality.
   /// [delay] is an optional parameter that specifies the delay between frames in milliseconds.
   /// [repeat] is an optional parameter that specifies the number of times the GIF should repeat. A value of 0 means repeat forever.
- ///
+  ///
   /// Returns a [Future] that completes with `true` if the GIF thumbnail is generated successfully, otherwise `false`.
   static Future<bool> generateGifThumbnail({
     required String videoPath,
     required String thumbnailPath,
-    int width =320,
-    int height=240,
-    int frameCount =10,
-    int delay =100,
+    int width = 320,
+    int height = 240,
+    int frameCount = 10,
+    int delay = 100,
     int repeat = 0, // 0 means repeat forever
   }) async {
     return await _channel.invokeMethod<bool>('generateGifThumbnail', {
-      'videoPath': videoPath,
-      'thumbnailPath': thumbnailPath,
-      'width': width,
-      'height': height,
-      'frameCount': frameCount,
-      'delay': delay,
-      'repeat': repeat,
-    }) ?? false;
+          'videoPath': videoPath,
+          'thumbnailPath': thumbnailPath,
+          'width': width,
+          'height': height,
+          'frameCount': frameCount,
+          'delay': delay,
+          'repeat': repeat,
+        }) ??
+        false;
   }
 }
 

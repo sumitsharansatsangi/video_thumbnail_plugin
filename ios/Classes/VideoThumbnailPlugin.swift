@@ -84,7 +84,7 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
     
     private func downloadVideo(from url: String, completion: @escaping (String?) -> Void) {
         guard let videoURL = URL(string: url) else {
-            print("Invalid URL: \(url)")
+            // print("Invalid URL: \(url)")
             completion(nil)
             return
         }
@@ -92,18 +92,18 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
         
         let task = URLSession.shared.downloadTask(with: videoURL) { location, response, error in
             if let error = error {
-                print("Failed to download video: \(error.localizedDescription)")
+                // print("Failed to download video: \(error.localizedDescription)")
                 completion(nil)
             } else if let location = location {
                 do {
                     try FileManager.default.moveItem(at: location, to: tempFileURL)
                     completion(tempFileURL.path)
                 } catch {
-                    print("Failed to move downloaded video: \(error.localizedDescription)")
+                    // print("Failed to move downloaded video: \(error.localizedDescription)")
                     completion(nil)
                 }
             } else {
-                print("Unknown error downloading video")
+                // print("Unknown error downloading video")
                 completion(nil)
             }
         }
@@ -136,7 +136,7 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
             }
             
         } catch {
-            print("Failed to get frame at time: \(time)")
+            // print("Failed to get frame at time: \(time)")
             return false
         }
     }
@@ -150,7 +150,7 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
            let fileSize = attributes[.size] as? Int, fileSize > 0 {
             return true
         } else {
-            print("Error: Generated GIF file is empty")
+            // print("Error: Generated GIF file is empty")
             return false
         }
     }
@@ -172,14 +172,14 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
         do {
             let imageRef = try generator.copyCGImage(at: time, actualTime: nil)
             guard let resizedImage = resizeImage(imageRef, width: width, height: height) else {
-                print("Failed to resize image")
+                // print("Failed to resize image")
                 return false
             }
             let imageData = UIImage(cgImage: resizedImage).pngData()
             try imageData?.write(to: URL(fileURLWithPath: thumbnailPath))
             return true
         } catch {
-            print("Failed to generate image thumbnail")
+            // print("Failed to generate image thumbnail")
             return false
         }
     }
@@ -198,7 +198,7 @@ public class VideoThumbnailPlugin: NSObject, FlutterPlugin {
                                       bytesPerRow: 0,
                                       space: image.colorSpace ?? CGColorSpaceCreateDeviceRGB(),
                                       bitmapInfo: image.bitmapInfo.rawValue) else {
-            print("Failed to create CGContext")
+            // print("Failed to create CGContext")
             return nil
         }
         

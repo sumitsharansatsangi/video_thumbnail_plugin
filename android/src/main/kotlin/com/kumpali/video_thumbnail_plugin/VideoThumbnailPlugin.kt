@@ -156,10 +156,6 @@ class VideoThumbnailPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 retriever.setDataSource(tempFile.absolutePath)
                 tempFile.deleteOnExit()
             }
-            videoPath.startsWith("assets/") -> {
-                val assetFilePath = getAssetFilePath(videoPath.removePrefix("assets/"))
-                retriever.setDataSource(assetFilePath)
-            }
             else -> retriever.setDataSource(videoPath)
         }
     }
