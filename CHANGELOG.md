@@ -1,5 +1,6 @@
 ## 0.0.4+2
-* Bug Fixes for Android.
+* Bug Fixes in Example.
+* Preview added to README.md.
 
 ## 0.0.4+1
 * Bug Fixes for IOS.
