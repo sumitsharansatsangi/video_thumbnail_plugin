@@ -8,7 +8,6 @@ A Flutter plugin to generate image and GIF thumbnails from video files. This plu
 <p >
   <img src="https://raw.githubusercontent.com/sumitsharansatsangi/video_thumbnail_plugin/refs/heads/main/Screenshot%20From%202025-02-07%2011-24-59.png" />
 </p>
-[![Demo Video](https://raw.githubusercontent.com/sumitsharansatsangi/video_thumbnail_plugin/main/Screenshot%20From%202025-02-07%2011-24-59.png)](https://github.com/sumitsharansatsangi/video_thumbnail_plugin/blob/main/Screencast%20From%202025-02-07%2011-21-45.mp4)
 
 ## Features
 
