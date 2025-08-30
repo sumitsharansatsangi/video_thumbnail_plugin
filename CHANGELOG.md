@@ -1,3 +1,6 @@
+## 0.0.5
+* Android dependency updated to `com.github.bumptech.glide:gifencoder-integration:5.0.0`.
+
 ## 0.0.4+2
 * Bug Fixes in Example.
 * Preview added to README.md.
