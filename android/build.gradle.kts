@@ -44,8 +44,6 @@ android {
 
     testOptions {
         unitTests.all {
-            useJUnitPlatform()
-
             testLogging {
                 events(
                     "passed",
