@@ -41,32 +41,9 @@ android {
             java.srcDirs("src/test/kotlin")
         }
     }
-
-    testOptions {
-        unitTests.all {
-            testLogging {
-                events(
-                    "passed",
-                    "skipped",
-                    "failed",
-                    "standardOut",
-                    "standardError"
-                )
-
-                showStandardStreams = true
-            }
-
-            outputs.upToDateWhen {
-                false
-            }
-        }
-    }
 }
 
 dependencies {
     implementation("com.github.bumptech.glide:gifencoder-integration:5.0.7")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
-
-    testImplementation(kotlin("test"))
-    testImplementation("org.mockito:mockito-core:5.23.0")
 }
